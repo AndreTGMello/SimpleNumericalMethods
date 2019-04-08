@@ -1,10 +1,18 @@
-function solve_gauss!(A::AbstractArray, b::AbstractArray)::AbstractArray
+function solve_gauss!(A::AbstractArray, b::AbstractArray; verbose::Bool=false)::AbstractArray
     m,n = size(A)
     P = zeros(Int64, m)
+    if verbose
+        println("----- Iteration 0 -----\n")
+        println("--- A ---")
+        pprintlnmat(A)
+        println("--- b ---")
+        pprintlnmat(b)
+    end
     for k = 1:m-1
         """
             Exchange rows in case the value at the diagonal is equal to zero.
-            Do this for rows in A and b. """
+            Do this for rows in A and b.
+        """
         if A[k,k] == 0
             q = k+1
             while A[q,k] == 0 && i < m
@@ -40,9 +48,16 @@ function solve_gauss!(A::AbstractArray, b::AbstractArray)::AbstractArray
             b[i] -= b[k]*A[i,k]
             A[i,k] = 0
         end
+        if verbose
+            println("----- Iteration $k -----\n")
+            println("--- A ---")
+            pprintlnmat(A)
+            println("--- b ---")
+            pprintlnmat(b)
+        end
     end
     """ Solve the equation using A, now triangular. """
-    sol = zeros(Float64, m)
+    sol = zeros(Float64, (m,1))
     for i = m:-1:1
         sol[i] = b[i]
         for j = m:-1:i+1
@@ -50,14 +65,23 @@ function solve_gauss!(A::AbstractArray, b::AbstractArray)::AbstractArray
         end
         sol[i] /= A[i,i]
     end
+    if verbose
+        println("----- Finish -----\n")
+        println("--- A ---")
+        pprintlnmat(A)
+        println("--- b ---")
+        pprintlnmat(b)
+        println("--- x ---")
+        pprintlnmat(sol)
+    end
     return sol
 end
 
 """ --- Tests for Gauss Elimination -Begind --- """
 A = Float64[[1 -1 3];[-2 2 4];[1 2 1]]
-b = Float64[1; -2; 1]
+b = Float64[1 -2 1]'
 A\b
-res_gauss = solve_gauss!(A,b)
+res_gauss = solve_gauss!(A,b,verbose=true)
 A
 b
 res = A\b
